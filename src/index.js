@@ -1,4 +1,4 @@
-const API_URL = 'https://pokeapi.co/api/v2/';
+const API_URL = 'https://pokeapi.co/api/v2';
 const RETURN_KEYCODE = 13;
 
 class App {
@@ -12,7 +12,19 @@ class App {
 
 	initComponents() {
 		this.search.init();
-		console.log(this.search);
+	}
+}
+
+class RequestHandler {
+	makeRequest(method, url, handler) {
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				handler(this.responseText);
+			}
+		};
+		xhttp.open(method, url, true);
+		xhttp.send();
 	}
 }
 
@@ -22,6 +34,7 @@ class Component {
 	 * @param {String} rootSelector 
 	 */
 	constructor(rootSelector) {
+		this.requestHandler = new RequestHandler();
 		this.rootSelector = rootSelector;
 	}
 
@@ -50,11 +63,14 @@ class Container extends Component {
 	}
 
 	handleSearchInput() {
-
+		console.log('here1');
 	}
 
-	showPokemon() {
-
+	showPokemon(pokemonName) {
+		let url = `${API_URL}/pokemon/${pokemonName}`;
+		this.requestHandler.makeRequest('GET', url, function (pokemon) {
+			
+		});
 	}
 }
 
@@ -79,8 +95,7 @@ class Search extends Container {
 		if (code == RETURN_KEYCODE) {
 			super.showPokemon(this.input);
 		} else {
-			// update the main display panel
-			this.handleSearchInput(this.input);
+			super.handleSearchInput(this.input);
 		}
 	}
 }
