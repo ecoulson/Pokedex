@@ -3,15 +3,10 @@ const RETURN_KEYCODE = 13;
 
 class App {
 	constructor() {
-		this.search = new Search('.pokedex__search-bar');
 	}
 
 	start() {
-		this.initComponents();
-	}
-
-	initComponents() {
-		this.search.init();
+		this.container = new Container('.pokedex');
 	}
 }
 
@@ -32,9 +27,7 @@ class Component {
 	constructor(selector) {
 		this.selector = selector;
 		this.requestHandler = new RequestHandler();
-	}
-
-	init() {
+		this.bridges = new Map();
 		this.root = document.querySelector(this.selector);
 	}
 
@@ -42,22 +35,50 @@ class Component {
 		let node = document.querySelector(selector);
 		node.addEventListener(event, listener);
 	}
+
+	addBridge(key, dispatcher, context) {
+		dispatcher = dispatcher.bind(context);
+		this.bridges.set(key, dispatcher);
+	}
 }
 
 class Container extends Component {
 	constructor(rootSelector) {
 		super(rootSelector);
-	}
+		this.search = new Search('.pokedex__search-bar');
+		this.display = new Display('.pokedex__display');
 
-	showPokemon(pokemonName) {
-		let url = API_URL + 'pokemon/' + pokemonName;
-		this.requestHandler.makeRequest('GET', url, function(data) {
-			let pokemon = JSON.parse(data);
-		});
+		this.search.addBridge('pokemon', this.display.displayPokemon, this.display);
 	}
 }
 
-class Search extends Container {
+class Display extends Component {
+	constructor(rootSelector) {
+		super(rootSelector);
+		this.displayTypes = {
+			LIST: 0,
+			POKEMON: 1,
+		};
+		this.display = this.displayTypes.LIST;
+	}
+
+	render() {
+		if (this.display == this.displayTypes.POKEMON) {
+			this.root.innerHTML = '<h1>hello</h1>';
+		}
+	}	
+
+	displayPokemon(pokemon) {
+		this.display = this.displayTypes.POKEMON;
+		this.render();
+	}
+
+	displayPokemonList(pokemonList) {
+
+	}
+}
+
+class Search extends Component {
 	constructor(rootSelector) {
 		super(rootSelector);
 
@@ -75,11 +96,19 @@ class Search extends Container {
 		
 		let code = event.keyCode;
 		if (code == RETURN_KEYCODE) {
-			// direct to pokemon
-			super.showPokemon(this.input);
+			this.displayPokemon();
 		} else {
 			// similar results
 		}
+	}
+
+	displayPokemon() {
+		let url = API_URL + 'pokemon/' + this.input + '/';
+		this.requestHandler.makeRequest('GET', url, (data) => {
+			let pokemon = JSON.parse(data);
+			let action = this.bridges.get('pokemon');
+			action(pokemon);
+		});
 	}
 }
 
