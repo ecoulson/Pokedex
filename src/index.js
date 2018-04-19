@@ -64,17 +64,37 @@ class Display extends Component {
 
 	render() {
 		if (this.display == this.displayTypes.POKEMON) {
-			this.root.innerHTML = '<h1>hello</h1>';
+			this.root.innerHTML = this.currentDisplayedPokemon.toElement();
+		} else {
+			// display suggested list
 		}
 	}	
 
-	displayPokemon(pokemon) {
+	displayPokemon(data) {
 		this.display = this.displayTypes.POKEMON;
+		let pokemon = new Pokemon(data);
+		this.currentDisplayedPokemon = pokemon;
 		this.render();
 	}
 
 	displayPokemonList(pokemonList) {
 
+	}
+}
+
+class Pokemon {
+	constructor(data) {
+		this.data = data;
+	}
+
+	toElement() {
+		console.log(this.data);
+		return (
+			`<div class="pokedex__pokemon">
+				<h1 class="pokedex__pokemon_name">${this.data.name}</h1>
+				<img src="${this.data.sprites.front_default}" class="pokedex__pokemon_sprite"/>
+			</div>`
+		);
 	}
 }
 
