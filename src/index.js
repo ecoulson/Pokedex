@@ -2,16 +2,8 @@ const API_URL = 'https://pokeapi.co/api/v2/';
 const RETURN_KEYCODE = 13;
 
 class App {
-	constructor() {
-		this.search = new Search('.pokedex__search-bar');
-	}
-
 	start() {
-		this.initComponents();
-	}
-
-	initComponents() {
-		this.search.init();
+		this.container = new Container('.pokedex');
 	}
 }
 
@@ -32,9 +24,7 @@ class Component {
 	constructor(selector) {
 		this.selector = selector;
 		this.requestHandler = new RequestHandler();
-	}
-
-	init() {
+		this.actions = new Map();
 		this.root = document.querySelector(this.selector);
 	}
 
@@ -42,22 +32,66 @@ class Component {
 		let node = document.querySelector(selector);
 		node.addEventListener(event, listener);
 	}
+
+	addAction(key, action, context) {
+		action = action.bind(context);
+		this.actions.set(key, action);
+	}
 }
 
 class Container extends Component {
 	constructor(rootSelector) {
 		super(rootSelector);
-	}
 
-	showPokemon(pokemonName) {
-		let url = API_URL + 'pokemon/' + pokemonName;
-		this.requestHandler.makeRequest('GET', url, function(data) {
-			let pokemon = JSON.parse(data);
-		});
+		this.search = new Search('.pokedex__searchbar');
+		this.display = new Display('.pokedex__display');
+
+		this.search.addAction('pokemon', this.display.displayPokemon, this.display);
 	}
 }
 
-class Search extends Container {
+class Display extends Component {
+	constructor(rootSelector) {
+		super(rootSelector);
+		this.displayTypes = {
+			LIST: 0,
+			POKEMON: 1,
+		};
+		this.display = this.displayTypes.LIST;
+	}
+
+	render() {
+		if (this.display == this.displayTypes.POKEMON) {
+			this.root.innerHTML = this.currentPokemon.toElement();
+		} else {
+
+		}
+	}
+
+	displayPokemon(data) {
+		this.display = this.displayTypes.POKEMON;
+		let pokemon = new Pokemon(data);
+		this.currentPokemon = pokemon;
+		this.render();
+	}
+}
+
+class Pokemon {
+	constructor(data) {
+		this.data = data;
+	}
+
+	toElement() {
+		return (
+			`<div class="pokedex__pokemon">
+				<h1 class="pokedex__pokemon_name">${this.data.name}</h1>
+				<img src="${this.data.sprites.front_default}" class="pokedex__pokemon_sprite"/>
+			</div>`
+		);
+	}
+}
+
+class Search extends Component {
 	constructor(rootSelector) {
 		super(rootSelector);
 
@@ -76,10 +110,19 @@ class Search extends Container {
 		let code = event.keyCode;
 		if (code == RETURN_KEYCODE) {
 			// direct to pokemon
-			super.showPokemon(this.input);
+			this.displayPokemon();
 		} else {
 			// similar results
 		}
+	}
+
+	displayPokemon() {
+		let url = API_URL + 'pokemon/' + this.input;
+		this.requestHandler.makeRequest('GET', url, (data) => {
+			let pokemon = JSON.parse(data);
+			let action = this.actions.get('pokemon');
+			action(pokemon);
+		})
 	}
 }
 
