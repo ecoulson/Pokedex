@@ -1,5 +1,6 @@
 const API_URL = 'https://pokeapi.co/api/v2/';
 const RETURN_KEYCODE = 13;
+const COUNT_URL = 'https://pokeapi.co/api/v2/pokemon/?limit=1';
 
 class App {
 	start() {
@@ -46,7 +47,28 @@ class Container extends Component {
 		this.search = new Search('.pokedex__searchbar');
 		this.display = new Display('.pokedex__display');
 
+		this.getPokemonNames = this.getPokemonNames.bind(this);
+
 		this.search.addAction('pokemon', this.display.displayPokemon, this.display);
+		this.requestHandler.makeRequest("GET", COUNT_URL, this.getPokemonNames);
+	}
+
+	getPokemonNames(data) {
+		let pokemonCount = JSON.parse(data).count;
+		let url = API_URL +  'pokemon/?limit=' + pokemonCount;
+		this.requestHandler.makeRequest("GET", url, function handleNames(data) {
+			let pokemons = JSON.parse(data);
+			this.names = pokemons.results;
+			this.display.hasFetchedNames = true;
+		}.bind(this));
+	}
+}
+
+class Loader {
+	toElement() {
+		return (
+			'<div class="loader">Loading...</div>'
+		);
 	}
 }
 
@@ -57,14 +79,23 @@ class Display extends Component {
 			LIST: 0,
 			POKEMON: 1,
 		};
+		this.loader = new Loader();
+
 		this.display = this.displayTypes.LIST;
+		this.hasFetchedNames = false;
+		this.render();
 	}
 
 	render() {
 		if (this.display == this.displayTypes.POKEMON) {
 			this.root.innerHTML = this.currentPokemon.toElement();
 		} else {
-
+			if (this.hasFetchedNames) {
+				// display autofill
+			} else {
+				// display loader
+				this.root.innerHTML = this.loader.toElement();
+			}
 		}
 	}
 
