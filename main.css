@@ -36,13 +36,14 @@ html, body {
 	background-color: rgb(160, 10, 10);
 }
 
-.pokedex__pokemon {
+.pokedex__pokemon_container {
 	width: 75%;
 	padding: 25px 0 12.5% 0;
 	height: 50%;
 	margin: 125px auto;
 	border: 5px solid rgb(200, 10, 10);
 	background-color: white;
+	overflow-y: scroll;
 }
 
 .pokedex__pokemon_name {
@@ -58,13 +59,36 @@ html, body {
 	display: block;
 }
 
+.pokedex__autofill-list-title {
+	text-align: center;
+}
+
+.pokedex__autofill-pokemon {
+	padding: 5px 0;
+	text-align: center;
+	border-top: 1px solid black;
+	text-transform: capitalize;
+	transition: 0.25s background-color ease-in, 0.25s color ease-in;
+}
+
+.pokedex__autofill-pokemon-name {
+	padding: 0;
+	margin: 0;
+}
+
+.pokedex__autofill-pokemon:hover {
+	cursor: pointer;
+	background-color: rgb(230, 230, 230);
+	color: rgb(160, 10, 10);
+}
+
 .loader,
 .loader:before,
 .loader:after {
   border-radius: 50%;
 }
 .loader {
-  color: #ffffff;
+  color: rgb(160, 10, 10);
   font-size: 11px;
   text-indent: -99999em;
   margin: 55px auto;
@@ -84,7 +108,7 @@ html, body {
 .loader:before {
   width: 5.2em;
   height: 10.2em;
-  background: rgb(160, 10, 10);
+  background: white;
   border-radius: 10.2em 0 0 10.2em;
   top: -0.1em;
   left: -0.1em;
@@ -96,7 +120,7 @@ html, body {
 .loader:after {
   width: 5.2em;
   height: 10.2em;
-  background: rgb(160, 10, 10);
+  background: white;
   border-radius: 0 10.2em 10.2em 0;
   top: -0.1em;
   left: 5.1em;
