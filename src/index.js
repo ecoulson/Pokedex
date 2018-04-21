@@ -138,7 +138,7 @@ class Autofill extends Component {
 	update(input) {
 		if (this.hasFetchedNames) {
 			this.filteredNames = this.names.filter((x) => {
-				return x.name.includes(input);
+				return x.name.includes(input.toLowerCase());
 			});
 		}
 	}
