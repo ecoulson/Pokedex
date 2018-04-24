@@ -57,6 +57,7 @@ class Container extends Component {
 		this.search.addAction('pokemon', this.display.displayPokemon, this.display);
 		this.search.addAction('update', this.autofill.update, this.autofill);
 		this.search.addAction('list', this.display.displayList, this.display);
+		this.search.addAction('requested', this.display.requestedPokemon, this.display);
 
 		this.display.addAction('list', this.autofill.toElement, this.autofill);
 		this.display.addAction('handlers', this.autofill.addListHandlers, this.autofill);
@@ -102,7 +103,12 @@ class Display extends Component {
 
 	render() {
 		if (this.display == this.displayTypes.POKEMON) {
-			this.root.innerHTML = this.currentPokemon.toElement();
+			if (this.isLoadingPokemon) {
+				this.root.innerHTML = this.loader.toElement();
+			} else {
+				this.isLoadingPokemon = false;
+				this.root.innerHTML = this.currentPokemon.toElement();
+			}
 		} else {
 			if (this.hasFetchedNames) {
 				let toEle = this.actions.get('list');
@@ -114,6 +120,10 @@ class Display extends Component {
 				this.root.innerHTML = this.loader.toElement();
 			}
 		}
+	}
+
+	requestedPokemon() {
+		this.isLoadingPokemon = true;
 	}
 
 	displayPokemon(data) {
@@ -138,8 +148,8 @@ class Autofill extends Component {
 	update(input) {
 		if (this.hasFetchedNames) {
 			this.filteredNames = this.names.filter((x) => {
-				return x.name.includes(input.toLowerCase());
-			});
+				return x.name.startsWith(input.toLowerCase());
+			}).sort();
 		}
 	}
 
@@ -197,6 +207,7 @@ class Pokemon {
 	toElement() {
 		return (
 			`<div class="pokedex__pokemon">
+				<span class="pokedex__back">X</span>
 				<h1 class="pokedex__pokemon_name">${this.data.name}</h1>
 				<img src="${this.data.sprites.front_default}" class="pokedex__pokemon_sprite"/>
 			</div>`
@@ -234,6 +245,7 @@ class Search extends Component {
 
 	displayPokemon(input) {
 		let url = API_URL + 'pokemon/' + input;
+		this.actions.get('requested')();
 		this.requestHandler.makeRequest('GET', url, (data) => {
 			let pokemon = JSON.parse(data);
 			let action = this.actions.get('pokemon');
