@@ -98,6 +98,7 @@ class Display extends Component {
 
 		this.display = this.displayTypes.LIST;
 		this.hasFetchedNames = false;
+		this.isLoadingPokemon = false;
 		this.render();
 	}
 
@@ -130,6 +131,7 @@ class Display extends Component {
 		this.display = this.displayTypes.POKEMON;
 		let pokemon = new Pokemon(data);
 		this.currentPokemon = pokemon;
+		this.isLoadingPokemon = false;
 		this.render();
 	}
 
